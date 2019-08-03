@@ -1,0 +1,14 @@
+{
+  "mastodon": {
+    "instance": "planet.moe",
+    "client_key": "clientKey",
+    "client_secret": "clientSecret",
+    "access_token": "accessToken",
+    "owner": "@bombwhale@planet.moe"
+  },
+  "twitter": {
+    "client_id": "clientID",
+    "client_secret": "clientSecret",
+    "account": "account"
+  }
+}

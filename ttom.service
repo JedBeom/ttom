@@ -1,0 +1,15 @@
+[Service]
+User=username
+Group=usergroup
+ExecStart=/home/username/bots/mltd_ttom/ttom
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=MLTD
+WorkingDirectory=/home/username/bots/ttom
+
+Restart=always
+RestartSec=5s
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
