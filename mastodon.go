@@ -53,7 +53,7 @@ func tootAll(posts []Post) {
 func downloadMedia(link string) io.Reader {
 	resp, err := http.Get(link)
 	if err != nil {
-		alertToOwner("downloadAll(): " + err.Error())
+		alertToOwner("downloadMedia(): " + err.Error())
 		return nil
 	}
 

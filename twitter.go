@@ -59,17 +59,17 @@ func checkNew() {
 
 	var newPosts []Post
 	for _, tw := range tweets {
-		if latestPost.ID == tw.ID {
+		createdAt, err := tw.CreatedAtTime()
+		if err != nil {
+			alertToOwner("checkNew:tw.CreatedAtTime(): " + err.Error())
+			continue
+		}
+
+		if createdAt.Sub(latestPost.CreatedAt).Seconds() <= 0 {
 			break
 		}
 
 		newPosts = append(newPosts, tweetFilter(tw))
-	}
-
-	if len(newPosts) >= 5 {
-		alertToOwner("It looks some tweets were deleted.")
-		latestPost = newPosts[0]
-		return
 	}
 
 	if len(newPosts) != 0 {
@@ -81,7 +81,17 @@ func checkNew() {
 
 func tweetFilter(tw twitter.Tweet) (post Post) {
 	post.ID = tw.ID
-	post.Text = tw.FullText
+	if InsertEmojis {
+		post.Text = Replace(tw.FullText)
+	} else {
+		post.Text = tw.FullText
+	}
+	var err error
+	post.CreatedAt, err = tw.CreatedAtTime()
+
+	if err != nil {
+		alertToOwner("tweetFilter(): " + err.Error())
+	}
 
 	if tw.ExtendedEntities != nil {
 		for _, img := range tw.ExtendedEntities.Media {
