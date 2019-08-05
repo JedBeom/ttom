@@ -2,15 +2,17 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"io"
+	"strings"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"golang.org/x/oauth2/clientcredentials"
 )
 
 var (
-	client           *twitter.Client
-	latestPost       Post
-	targetTwitterAcc *twitter.User
+	client     *twitter.Client
+	latestPost Post
 )
 
 func TwitterInit() {
@@ -21,19 +23,18 @@ func TwitterInit() {
 	}
 	httpClient := twitterConfig.Client(context.TODO())
 	client = twitter.NewClient(httpClient)
-
-	var err error
-	targetTwitterAcc, _, err = client.Users.Show(&twitter.UserShowParams{
-		ScreenName: config.Twitter.Account,
-	})
-	if err != nil {
-		panic(err)
-	}
 }
 
-func getTweets(limit int) ([]twitter.Tweet, error) {
+func getTwitterUser(acc string) (user *twitter.User, err error) {
+	user, _, err = client.Users.Show(&twitter.UserShowParams{
+		ScreenName: acc,
+	})
+	return
+}
+
+func getTweets(targetID int64, limit int) ([]twitter.Tweet, error) {
 	tweets, _, err := client.Timelines.UserTimeline(&twitter.UserTimelineParams{
-		UserID:    targetTwitterAcc.ID,
+		UserID:    targetID,
 		Count:     limit,
 		TweetMode: "extended",
 	})
@@ -41,8 +42,8 @@ func getTweets(limit int) ([]twitter.Tweet, error) {
 	return tweets, err
 }
 
-func checkNew() {
-	tweets, err := getTweets(5)
+func checkNew(targetID int64) {
+	tweets, err := getTweets(targetID, 5)
 	if err != nil {
 		alertToOwner("checkNew(): " + err.Error())
 		return
@@ -101,5 +102,29 @@ func tweetFilter(tw twitter.Tweet) (post Post) {
 		}
 	}
 
+	return
+}
+
+func detectNewAvatarOrHeader(old *twitter.User) (new *twitter.User) {
+	fmt.Println("detecting...")
+	var err error
+	new, err = getTwitterUser(config.Twitter.Account)
+	if err != nil {
+		alertToOwner("detectNewAvatarOrHeader:getTwitterUser(): " + err.Error())
+		return
+	}
+
+	var avatar, header io.Reader
+	if new.ProfileImageURLHttps != old.ProfileImageURLHttps {
+		avatar = downloadMedia(strings.Replace(new.ProfileImageURLHttps, "_normal", "", 1))
+	}
+
+	if new.ProfileBannerURL != old.ProfileBannerURL {
+		header = downloadMedia(new.ProfileBannerURL)
+	}
+
+	if avatar != nil || header != nil {
+		changeProfilePhoto(avatar, header)
+	}
 	return
 }

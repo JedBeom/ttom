@@ -96,3 +96,14 @@ func alertToOwner(content string) {
 		log.Println(err)
 	}
 }
+
+func changeProfilePhoto(avatar, header io.Reader) {
+	_, err := mc.UpdateAccountReader(madon.UpdateAccountParams{
+		AvatarImageReader: avatar,
+		HeaderImageReader: header,
+	})
+
+	if err != nil {
+		alertToOwner("changeProfilePhoto:UpdateAccount(): " + err.Error())
+	}
+}
