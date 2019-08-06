@@ -42,6 +42,9 @@ func tootAll(posts []Post) {
 			images = append(images, downloadMedia(img))
 		}
 
+		post.Text = html.UnescapeString(post.Text)
+		post.Text = Replace(post.Text)
+
 		_, err := toot(post.Text, "", images)
 		if err != nil {
 			alertToOwner("tootAll(): " + err.Error())
@@ -80,7 +83,7 @@ func toot(content, visibility string, readers []io.Reader) (st *madon.Status, er
 	}
 
 	status := madon.PostStatusParams{
-		Text:       html.UnescapeString(content),
+		Text:       content,
 		Visibility: visibility,
 		MediaIDs:   mediaIDs,
 	}

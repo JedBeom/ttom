@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"strings"
 
@@ -82,14 +81,10 @@ func checkNew(targetID int64) {
 
 func tweetFilter(tw twitter.Tweet) (post Post) {
 	post.ID = tw.ID
-	if InsertEmojis {
-		post.Text = Replace(tw.FullText)
-	} else {
-		post.Text = tw.FullText
-	}
+	post.Text = tw.FullText
+
 	var err error
 	post.CreatedAt, err = tw.CreatedAtTime()
-
 	if err != nil {
 		alertToOwner("tweetFilter(): " + err.Error())
 	}
@@ -106,7 +101,6 @@ func tweetFilter(tw twitter.Tweet) (post Post) {
 }
 
 func detectNewAvatarOrHeader(old *twitter.User) (new *twitter.User) {
-	fmt.Println("detecting...")
 	var err error
 	new, err = getTwitterUser(config.Twitter.Account)
 	if err != nil {
