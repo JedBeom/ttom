@@ -20,7 +20,7 @@ func main() {
 
 	for {
 		checkNew(user.ID)
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Second * time.Duration(config.Twitter.RefreshSecond))
 	}
 }
 

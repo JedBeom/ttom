@@ -16,9 +16,10 @@ type Config struct {
 	} `json:"mastodon"`
 
 	Twitter struct {
-		ClientID     string `json:"client_id"`
-		ClientSecret string `json:"client_secret"`
-		Account      string `json:"account"`
+		ClientID      string `json:"client_id"`
+		ClientSecret  string `json:"client_secret"`
+		Account       string `json:"account"`
+		RefreshSecond int    `json:"refresh_sec"`
 	} `json:"twitter"`
 }
 

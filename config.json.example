@@ -9,6 +9,7 @@
   "twitter": {
     "client_id": "clientID",
     "client_secret": "clientSecret",
-    "account": "account"
+    "account": "account",
+    "refresh_sec": 10
   }
 }
