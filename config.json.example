@@ -4,7 +4,8 @@
     "client_key": "clientKey",
     "client_secret": "clientSecret",
     "access_token": "accessToken",
-    "owner": "@bombwhale@planet.moe"
+    "owner": "@bombwhale@planet.moe",
+    "insert_emoji": true
   },
   "twitter": {
     "client_id": "clientID",

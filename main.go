@@ -16,6 +16,8 @@ func main() {
 		panic(err)
 	}
 
+	generateRegexp(&idolTable)
+
 	go autoChange(user)
 
 	for {

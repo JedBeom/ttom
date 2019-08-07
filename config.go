@@ -12,7 +12,8 @@ type Config struct {
 		ClientSecret string `json:"client_secret"`
 		AccessToken  string `json:"access_token"`
 
-		Owner string `json:"owner"`
+		InsertEmoji bool   `json:"insert_emoji"`
+		Owner       string `json:"owner"`
 	} `json:"mastodon"`
 
 	Twitter struct {

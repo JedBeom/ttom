@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	client     *twitter.Client
+	tc         *twitter.Client
 	latestPost Post
 )
 
@@ -21,18 +21,18 @@ func TwitterInit() {
 		TokenURL:     "https://api.twitter.com/oauth2/token",
 	}
 	httpClient := twitterConfig.Client(context.TODO())
-	client = twitter.NewClient(httpClient)
+	tc = twitter.NewClient(httpClient)
 }
 
 func getTwitterUser(acc string) (user *twitter.User, err error) {
-	user, _, err = client.Users.Show(&twitter.UserShowParams{
+	user, _, err = tc.Users.Show(&twitter.UserShowParams{
 		ScreenName: acc,
 	})
 	return
 }
 
 func getTweets(targetID int64, limit int) ([]twitter.Tweet, error) {
-	tweets, _, err := client.Timelines.UserTimeline(&twitter.UserTimelineParams{
+	tweets, _, err := tc.Timelines.UserTimeline(&twitter.UserTimelineParams{
 		UserID:    targetID,
 		Count:     limit,
 		TweetMode: "extended",
