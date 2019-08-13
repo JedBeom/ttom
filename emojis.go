@@ -53,7 +53,7 @@ var idolTable = []Idol{
 	{LastName: "마츠다", FirstName: "아리사", EmojiName: "arisa"},
 	{LastName: "코사카", FirstName: "우미", EmojiName: "umi"},
 	{LastName: "나카타니", FirstName: "이쿠", EmojiName: "iku"},
-	{LastName: "에밀리", FirstName: "스튜어트", EmojiName: "emily"},
+	{FirstName: "에밀리", EmojiName: "emily"},
 	{LastName: "야부키", FirstName: "카나", EmojiName: "kana"},
 	{LastName: "요코야마", FirstName: "나오", EmojiName: "nao"},
 	{LastName: "후쿠다", FirstName: "노리코", EmojiName: "noriko"},
