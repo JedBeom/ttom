@@ -24,6 +24,7 @@ func TwitterInit() {
 	tc = twitter.NewClient(httpClient)
 }
 
+// User를 불러옵니다
 func getTwitterUser(acc string) (user *twitter.User, err error) {
 	user, _, err = tc.Users.Show(&twitter.UserShowParams{
 		ScreenName: acc,
@@ -31,6 +32,7 @@ func getTwitterUser(acc string) (user *twitter.User, err error) {
 	return
 }
 
+// 트윗을 불러옵니다
 func getTweets(targetID int64, limit int) ([]twitter.Tweet, error) {
 	tweets, _, err := tc.Timelines.UserTimeline(&twitter.UserTimelineParams{
 		UserID:    targetID,
@@ -41,17 +43,20 @@ func getTweets(targetID int64, limit int) ([]twitter.Tweet, error) {
 	return tweets, err
 }
 
+// 새 트윗이 있는지 체크
 func checkNew(targetID int64) {
+	// 5개 트윗 불러오기
 	tweets, err := getTweets(targetID, 5)
 	if err != nil {
-		alertToOwner("checkNew(): " + err.Error())
 		return
 	}
 
+	// 아무 트윗도 안불러왔으면 끝
 	if len(tweets) == 0 {
 		return
 	}
 
+	// cached tweet이 없다면
 	if latestPost.ID == 0 {
 		latestPost = tweetFilter(tweets[0])
 		return
@@ -61,10 +66,10 @@ func checkNew(targetID int64) {
 	for _, tw := range tweets {
 		createdAt, err := tw.CreatedAtTime()
 		if err != nil {
-			alertToOwner("checkNew:tw.CreatedAtTime(): " + err.Error())
 			continue
 		}
 
+		// 만약 캐시된 트윗보다 더 오래전의 트윗이라면 브레이크
 		if createdAt.Sub(latestPost.CreatedAt).Seconds() <= 0 {
 			break
 		}
@@ -79,16 +84,15 @@ func checkNew(targetID int64) {
 
 }
 
+// Tweet -> Post
 func tweetFilter(tw twitter.Tweet) (post Post) {
+	// ID, Text Get
 	post.ID = tw.ID
 	post.Text = tw.FullText
 
-	var err error
-	post.CreatedAt, err = tw.CreatedAtTime()
-	if err != nil {
-		alertToOwner("tweetFilter(): " + err.Error())
-	}
+	post.CreatedAt, _ = tw.CreatedAtTime()
 
+	// Image가 있다면
 	if tw.ExtendedEntities != nil {
 		for _, img := range tw.ExtendedEntities.Media {
 			if img.Type == "photo" {
@@ -100,6 +104,7 @@ func tweetFilter(tw twitter.Tweet) (post Post) {
 	return
 }
 
+// 새로운 아바타나 헤더가 있는지 확인
 func detectNewAvatarOrHeader(old *twitter.User) (new *twitter.User) {
 	var err error
 	new, err = getTwitterUser(config.Twitter.Account)
@@ -117,6 +122,7 @@ func detectNewAvatarOrHeader(old *twitter.User) (new *twitter.User) {
 		header = downloadMedia(new.ProfileBannerURL)
 	}
 
+	// 만약 있다면 교체
 	if avatar != nil || header != nil {
 		changeProfilePhoto(avatar, header)
 	}
