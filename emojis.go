@@ -111,7 +111,7 @@ func generateRegexp(idols *[]Idol) {
 	}
 }
 
-func insertEmojis(text string) (output string) {
+func insertEmojis(text string) string {
 	for i := range idolTable {
 		emoji := EmojiPrefix + idolTable[i].EmojiName + EmojiSuffix // :mltd_name:
 		index := idolTable[i].Regex.FindStringIndex(text)           // find
@@ -119,22 +119,22 @@ func insertEmojis(text string) (output string) {
 			if string(text[index[0]]) != " " { // if not space
 
 				if text[index[0]] == 10 { // if newline
-					emoji = "\n" + emoji + " "                           // add newline
-					output = text[:index[0]] + emoji + text[index[0]+1:] // ignores old newline
+					emoji = "\n" + emoji + " "                         // add newline
+					text = text[:index[0]] + emoji + text[index[0]+1:] // ignores old newline
 				} else {
 					emoji += " "
-					output = text[:index[0]] + emoji + text[index[0]:] // insert
+					text = text[:index[0]] + emoji + text[index[0]:] // insert
 				}
 
 			} else { // if space
 				emoji = " " + emoji
-				output = text[:index[0]] + emoji + text[index[0]:] // insert
+				text = text[:index[0]] + emoji + text[index[0]:] // insert
 			}
 		}
 	}
 
 	r := strings.NewReplacer(Types...) // types replacer
-	output = r.Replace(output)         // insert types emojis
+	text = r.Replace(text)             // insert types emojis
 
-	return
+	return text
 }
