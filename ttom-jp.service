@@ -1,11 +1,11 @@
 [Service]
 User=username
 Group=usergroup
-ExecStart=/home/username/bots/ttom/ttom
+ExecStart=/home/username/bots/ttom-jp/ttom-jp
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=MLTD
-WorkingDirectory=/home/username/bots/ttom
+SyslogIdentifier=MLTDJP
+WorkingDirectory=/home/username/bots/ttom-jp
 
 Restart=always
 RestartSec=5s
