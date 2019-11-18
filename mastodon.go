@@ -49,7 +49,7 @@ func tootAll(posts []Post) {
 
 		_, err := toot(post.Text, "", images)
 		if err != nil {
-			alertToOwner("tootAll(): " + err.Error())
+			alertToOwner("tootAll(): " + err.Error() + "\n" + post.Text)
 		}
 
 	}
