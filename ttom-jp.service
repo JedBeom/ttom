@@ -1,7 +1,7 @@
 [Service]
 User=username
 Group=usergroup
-ExecStart=/home/username/bots/ttom-jp/ttom-jp
+ExecStart=/home/username/bots/ttom-jp/ttom
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=MLTDJP

@@ -100,9 +100,9 @@ func generateRegexp(idols *[]Idol) {
 	for i := range *idols {
 		var err error
 		if (*idols)[i].LastName == "" {
-			(*idols)[i].Regex, err = regexp.Compile(`(\A|\s|'|")(` + (*idols)[i].FirstName + `)`)
+			(*idols)[i].Regex, err = regexp.Compile(`(` + (*idols)[i].FirstName + `)`)
 		} else {
-			(*idols)[i].Regex, err = regexp.Compile(`(\A|\s|\s'|\s")(` + (*idols)[i].LastName + `\s*)?(` + (*idols)[i].FirstName + `)`)
+			(*idols)[i].Regex, err = regexp.Compile(`(` + (*idols)[i].LastName + `)?(` + (*idols)[i].FirstName + `)`)
 		}
 
 		if err != nil {
