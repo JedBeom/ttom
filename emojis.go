@@ -14,16 +14,16 @@ type Idol struct {
 }
 
 const (
-	EmojiPrefix = ":mltd_"
-	EmojiSuffix = ":"
+	EmojiPrefix = "​:mltd_"
+	EmojiSuffix = ":​"
 )
 
 var (
 	Types = []string{
-		"Fairy", ":mltd_fairy: Fairy",
-		"Angel", ":mltd_angel: Angel",
-		"Princess", ":mltd_princess: Princess",
-		"SSR", ":mltd_gasha_rainbow: SSR",
+		"Fairy", "​:mltd_fairy:​Fairy",
+		"Angel", "​:mltd_angel:​Angel",
+		"Princess", "​:mltd_princess:​Princess",
+		"SSR", "​:mltd_gasha_rainbow:​SSR",
 	}
 )
 
