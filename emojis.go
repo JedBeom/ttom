@@ -20,9 +20,10 @@ const (
 
 var (
 	Types = []string{
-		"Fairy", "​:mltd_fairy:​Fairy",
-		"Angel", "​:mltd_angel:​Angel",
-		"Princess", "​:mltd_princess:​Princess",
+		"765PRO", "​:765pro:​765PRO",
+		"FAIRY", "​:mltd_fairy:​FAIRY",
+		"ANGEL", "​:mltd_angel:​ANGEL",
+		"PRINCESS", "​:mltd_princess:​PRINCESS",
 		"SSR", "​:mltd_gasha_rainbow:​SSR",
 	}
 )
