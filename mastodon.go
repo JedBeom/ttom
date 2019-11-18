@@ -44,7 +44,7 @@ func tootAll(posts []Post) {
 
 		post.Text = html.UnescapeString(post.Text)
 		if config.Mastodon.InsertEmoji {
-			post.Text = insertEmojis(post.Text)
+			post.Text = insertAll(post.Text)
 		}
 
 		_, err := toot(post.Text, "", images)

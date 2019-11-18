@@ -14,17 +14,18 @@ type Idol struct {
 }
 
 const (
-	EmojiPrefix = "​:mltd_"
-	EmojiSuffix = ":​"
+	ZeroWidth   = "​"
+	EmojiPrefix = ZeroWidth + ":mltd_"
+	EmojiSuffix = ":" + ZeroWidth
 )
 
 var (
 	Types = []string{
-		"765PRO", "​:765pro:​765PRO",
-		"FAIRY", "​:mltd_fairy:​FAIRY",
-		"ANGEL", "​:mltd_angel:​ANGEL",
-		"PRINCESS", "​:mltd_princess:​PRINCESS",
-		"SSR", "​:mltd_gasha_rainbow:​SSR",
+		"765PRO", ZeroWidth + ":765pro:" + ZeroWidth + "765PRO",
+		"FAIRY", EmojiPrefix + "fairy" + EmojiSuffix + "FAIRY",
+		"ANGEL", EmojiPrefix + "angel" + EmojiSuffix + "ANGEL",
+		"PRINCESS", EmojiPrefix + "princess" + EmojiSuffix + "PRINCESS",
+		"SSR", EmojiPrefix + "gasha_rainbow" + EmojiSuffix + "SSR",
 	}
 )
 
@@ -92,9 +93,6 @@ var idolTable = []Idol{
 	// Workers
 	{LastName: "音無", FirstName: "小鳥", EmojiName: "kotori"},
 	{LastName: "青羽", FirstName: "美咲", EmojiName: "misaki"},
-
-	// ETC
-	{FirstName: "SR", EmojiName: "gasha_yellow"},
 }
 
 func generateRegexp(idols *[]Idol) {
@@ -112,30 +110,68 @@ func generateRegexp(idols *[]Idol) {
 	}
 }
 
-func insertEmojis(text string) string {
+func insertGasha(text string) string {
+	sr, err := regexp.Compile(`SR`)
+	if err != nil {
+		alertToOwner("REGEXP COMPILE ERROR")
+		return text
+	}
+
+	indexes := sr.FindAllStringIndex(text, -1)
+	if indexes == nil {
+		return text
+	}
+	srEmoji := EmojiPrefix + "gasha_yellow" + EmojiSuffix
+
+	inserted := 0
+	for _, index := range indexes {
+		index[0] = index[0] + len(srEmoji)*inserted
+		if index[0] > 0 {
+			if string(text[index[0]-1]) == "S" {
+				continue
+			}
+		}
+		text = insertEmoji(text, srEmoji, index[0])
+		inserted++
+	}
+
+	return text
+}
+
+func insertEmoji(text, emoji string, index int) string {
+	if len(text) < index {
+		return text
+	}
+
+	if string(text[index]) == " " { // if space
+		text = text[:index] + emoji + text[index:] // insert
+	}
+
+	if text[index] == 10 { // if newline
+		emoji = "\n" + emoji                         // add newline
+		text = text[:index] + emoji + text[index+1:] // ignores old newline
+	} else {
+		text = text[:index] + emoji + text[index:] // insert
+	}
+
+	return text
+}
+
+func insertAll(text string) string {
 	for i := range idolTable {
 		emoji := EmojiPrefix + idolTable[i].EmojiName + EmojiSuffix // :mltd_name:
 		index := idolTable[i].Regex.FindStringIndex(text)           // find
-		if len(index) != 0 {                                        // if exist
-			if string(text[index[0]]) != " " { // if not space
-
-				if text[index[0]] == 10 { // if newline
-					emoji = "\n" + emoji + " "                         // add newline
-					text = text[:index[0]] + emoji + text[index[0]+1:] // ignores old newline
-				} else {
-					emoji += " "
-					text = text[:index[0]] + emoji + text[index[0]:] // insert
-				}
-
-			} else { // if space
-				emoji = " " + emoji
-				text = text[:index[0]] + emoji + text[index[0]:] // insert
-			}
+		if index == nil {
+			continue
 		}
+
+		text = insertEmoji(text, emoji, index[0])
+
 	}
 
 	r := strings.NewReplacer(Types...) // types replacer
-	text = r.Replace(text)             // insert types emojis
+	text = r.Replace(text)             // insert types emoji
+	text = insertGasha(text)
 
 	return text
 }
