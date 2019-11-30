@@ -98,10 +98,11 @@ var idolTable = []Idol{
 func generateRegexp(idols *[]Idol) {
 	for i := range *idols {
 		var err error
+		nameRule := (*idols)[i].FirstName + "ちゃん|" + (*idols)[i].FirstName + "さん|" + (*idols)[i].FirstName + "「"
 		if (*idols)[i].LastName == "" {
-			(*idols)[i].Regex, err = regexp.Compile(`(` + (*idols)[i].FirstName + `)`)
+			(*idols)[i].Regex, err = regexp.Compile("(" + nameRule + ")")
 		} else {
-			(*idols)[i].Regex, err = regexp.Compile(`(` + (*idols)[i].LastName + `)?(` + (*idols)[i].FirstName + `)`)
+			(*idols)[i].Regex, err = regexp.Compile("(" + (*idols)[i].LastName + (*idols)[i].FirstName + "|" + nameRule + ")")
 		}
 
 		if err != nil {

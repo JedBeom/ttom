@@ -75,7 +75,7 @@ func toot(content, visibility string, readers []io.Reader) (st *madon.Status, er
 
 	// upload medias
 	for _, reader := range readers {
-		attach, err := mc.UploadMediaReader(reader, "mltd_img", "", "")
+		attach, err := mc.UploadMediaReader(reader, "mltd_media", "", "")
 		if err != nil {
 			alertToOwner("toot(): " + err.Error())
 			continue

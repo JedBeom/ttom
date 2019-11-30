@@ -92,11 +92,22 @@ func tweetFilter(tw twitter.Tweet) (post Post) {
 
 	post.CreatedAt, _ = tw.CreatedAtTime()
 
-	// Image가 있다면
+	// Video/Image 있다면
 	if tw.ExtendedEntities != nil {
-		for _, img := range tw.ExtendedEntities.Media {
-			if img.Type == "photo" {
-				post.Images = append(post.Images, img.MediaURLHttps)
+		for _, media := range tw.ExtendedEntities.Media {
+			if len(post.Images) >= 4 {
+				break
+			}
+
+			if media.Type == "photo" {
+				post.Images = append(post.Images, media.MediaURLHttps)
+			} else if media.Type == "video" {
+				for _, v := range media.VideoInfo.Variants {
+					if v.ContentType == "video/mp4" {
+						post.Images = append(post.Images, v.URL)
+						break
+					}
+				}
 			}
 		}
 	}
