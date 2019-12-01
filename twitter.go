@@ -99,11 +99,11 @@ func tweetFilter(tw twitter.Tweet) (post Post) {
 				break
 			}
 
-			if media.Type == "photo" {
-				post.Images = append(post.Images, media.MediaURLHttps)
-			} else if media.Type == "video" {
+			if media.Type == "photo" { // is photo
+				post.Images = append(post.Images, media.MediaURLHttps) // add
+			} else if media.Type == "video" { // is video
 				for _, v := range media.VideoInfo.Variants {
-					if v.ContentType == "video/mp4" {
+					if v.ContentType == "video/mp4" && v.Bitrate >= 1900000 { // is mp4 and 720p or up
 						post.Images = append(post.Images, v.URL)
 						break
 					}
@@ -121,6 +121,7 @@ func detectNewAvatarOrHeader(old *twitter.User) (new *twitter.User) {
 	new, err = getTwitterUser(config.Twitter.Account)
 	if err != nil {
 		alertToOwner("detectNewAvatarOrHeader:getTwitterUser(): " + err.Error())
+		new = old
 		return
 	}
 

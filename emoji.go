@@ -90,19 +90,29 @@ var idolTable = []Idol{
 	{LastName: "北巻", FirstName: "麗花", EmojiName: "reika"},
 	{LastName: "桜守", FirstName: "歌織", EmojiName: "kaori"},
 
-	// Workers
+	// Guests
+	{FirstName: "詩花", EmojiName: "shika"},
+
+	// Staffs
 	{LastName: "音無", FirstName: "小鳥", EmojiName: "kotori"},
 	{LastName: "青羽", FirstName: "美咲", EmojiName: "misaki"},
+}
+
+func chanAndSan(name string) string {
+	return name + "ちゃん|" + name + "さん"
 }
 
 func generateRegexp(idols *[]Idol) {
 	for i := range *idols {
 		var err error
-		nameRule := (*idols)[i].FirstName + "ちゃん|" + (*idols)[i].FirstName + "さん|" + (*idols)[i].FirstName + "「"
+		last := (*idols)[i].LastName
+		first := (*idols)[i].FirstName
+
+		nameRule := chanAndSan(first) + "|" + first + "「"
 		if (*idols)[i].LastName == "" {
 			(*idols)[i].Regex, err = regexp.Compile("(" + nameRule + ")")
 		} else {
-			(*idols)[i].Regex, err = regexp.Compile("(" + (*idols)[i].LastName + (*idols)[i].FirstName + "|" + nameRule + ")")
+			(*idols)[i].Regex, err = regexp.Compile("(" + last + first + "|" + nameRule + "|" + chanAndSan(last) + ")")
 		}
 
 		if err != nil {
