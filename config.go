@@ -14,6 +14,7 @@ type Config struct {
 
 		InsertEmoji bool   `json:"insert_emoji"`
 		Owner       string `json:"owner"`
+		Visibility  string `json:"visibility"`
 	} `json:"mastodon"`
 
 	Twitter struct {

@@ -68,7 +68,7 @@ func downloadMedia(link string) io.Reader {
 func toot(content, visibility string, readers []io.Reader) (st *madon.Status, err error) {
 
 	if visibility == "" {
-		visibility = "public"
+		visibility = config.Mastodon.Visibility
 	}
 
 	var mediaIDs = make([]int64, 0, 4)
