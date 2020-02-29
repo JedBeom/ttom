@@ -109,10 +109,11 @@ func generateRegexp(idols *[]Idol) {
 		first := (*idols)[i].FirstName
 
 		nameRule := chanAndSan(first) + "|" + first + "「"
+		fullNameRule := "(" + last + first + "|" + nameRule + "|" + chanAndSan(last) + ")"
 		if (*idols)[i].LastName == "" {
-			(*idols)[i].Regex, err = regexp.Compile("(" + nameRule + ")")
+			(*idols)[i].Regex, err = regexp.Compile("(" + first + "|" + nameRule + ")")
 		} else {
-			(*idols)[i].Regex, err = regexp.Compile("(" + last + first + "|" + nameRule + "|" + chanAndSan(last) + ")")
+			(*idols)[i].Regex, err = regexp.Compile(fullNameRule)
 		}
 
 		if err != nil {
