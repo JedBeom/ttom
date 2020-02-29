@@ -121,36 +121,28 @@ func generateRegexp(idols *[]Idol) {
 	}
 }
 
-func insertGasha(text string) string {
-	sr, err := regexp.Compile(`SR`)
-	if err != nil {
-		alertToOwner("REGEXP COMPILE ERROR")
-		return text
+func canInsert(text, emoji string, index int) bool {
+	if index == 0 {
+		return true
 	}
 
-	indexes := sr.FindAllStringIndex(text, -1)
-	if indexes == nil {
-		return text
-	}
-	srEmoji := EmojiPrefix + "gasha_yellow" + EmojiSuffix
-
-	inserted := 0
-	for _, index := range indexes {
-		index[0] = index[0] + len(srEmoji)*inserted
-		if index[0] > 0 {
-			if string(text[index[0]-1]) == "S" {
-				continue
-			}
-		}
-		text = insertEmoji(text, srEmoji, index[0])
-		inserted++
+	if emoji == EmojiPrefix+"ayumu"+EmojiSuffix && string(text[index-3:index]) == "雪" {
+		return false
 	}
 
-	return text
+	if string(text[index-1]) == "S" {
+		return false
+	}
+
+	return true
 }
 
-func insertEmoji(text, emoji string, index int) string {
+func insert(text, emoji string, index int) string {
 	if len(text) < index {
+		return text
+	}
+
+	if !canInsert(text, emoji, index) {
 		return text
 	}
 
@@ -168,21 +160,46 @@ func insertEmoji(text, emoji string, index int) string {
 	return text
 }
 
-func insertAll(text string) string {
-	for i := range idolTable {
-		emoji := EmojiPrefix + idolTable[i].EmojiName + EmojiSuffix // :mltd_name:
-		index := idolTable[i].Regex.FindStringIndex(text)           // find
-		if index == nil {
+func insertSR(text string) string {
+	sr, err := regexp.Compile(`SR`)
+	if err != nil {
+		alertToOwner("REGEXP COMPILE ERROR")
+		return text
+	}
+
+	return insertAll(text, "gasha_yellow", sr)
+}
+
+func insertAll(text, emojiName string, re *regexp.Regexp) string {
+	indexes := re.FindAllStringIndex(text, -1) // find
+	if indexes == nil {
+		return text
+	}
+
+	emoji := EmojiPrefix + emojiName + EmojiSuffix // :mltd_name:
+	addedLen := 0
+	for _, index := range indexes {
+		index[0] += addedLen
+		textInserted := insert(text, emoji, index[0])
+		if len(textInserted) == len(text) {
 			continue
 		}
 
-		text = insertEmoji(text, emoji, index[0])
-
+		addedLen += len(textInserted) - len(text)
+		text = textInserted
 	}
 
+	return text
+}
+
+func insertEmoji(text string) string {
+	for i := range idolTable {
+		text = insertAll(text, idolTable[i].EmojiName, idolTable[i].Regex)
+	}
+
+	text = insertSR(text)
 	r := strings.NewReplacer(Types...) // types replacer
 	text = r.Replace(text)             // insert types emoji
-	text = insertGasha(text)
 
 	return text
 }
