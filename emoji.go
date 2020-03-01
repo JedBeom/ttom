@@ -20,12 +20,15 @@ const (
 )
 
 var (
-	Types = []string{
+	EasyIcons = []string{
 		"765PRO", ZeroWidth + ":765pro:" + ZeroWidth + "765PRO",
-		"FAIRY", EmojiPrefix + "fairy" + EmojiSuffix + "FAIRY",
-		"ANGEL", EmojiPrefix + "angel" + EmojiSuffix + "ANGEL",
-		"PRINCESS", EmojiPrefix + "princess" + EmojiSuffix + "PRINCESS",
-		"SSR", EmojiPrefix + "gasha_rainbow" + EmojiSuffix + "SSR",
+		"FAIRY", emojinize("fairy") + "FAIRY",
+		"ANGEL", emojinize("angel") + "ANGEL",
+		"PRINCESS", emojinize("princess") + "PRINCESS",
+		"SSR", emojinize("gasha_rainbow") + "SSR",
+		"プラチナスター", emojinize("pst") + "プラチナスター",
+		"ミリオンフェス", emojinize("fes") + "ミリオンフェス",
+		"ミリオンジュエル", emojinize("jewel") + "ミリオンジュエル",
 	}
 )
 
@@ -102,18 +105,21 @@ func chanAndSan(name string) string {
 	return name + "ちゃん|" + name + "さん"
 }
 
+func emojinize(name string) string {
+	return EmojiPrefix + name + EmojiSuffix
+}
+
 func generateRegexp(idols *[]Idol) {
 	for i := range *idols {
 		var err error
 		last := (*idols)[i].LastName
 		first := (*idols)[i].FirstName
 
-		nameRule := chanAndSan(first) + "|" + first + "「"
-		fullNameRule := "(" + last + first + "|" + nameRule + "|" + chanAndSan(last) + ")"
+		nameRule := chanAndSan(first) + "|" + last + first + "「"
 		if (*idols)[i].LastName == "" {
-			(*idols)[i].Regex, err = regexp.Compile("(" + first + "|" + nameRule + ")")
+			(*idols)[i].Regex, err = regexp.Compile("(" + nameRule + ")")
 		} else {
-			(*idols)[i].Regex, err = regexp.Compile(fullNameRule)
+			(*idols)[i].Regex, err = regexp.Compile("(" + nameRule + "|" + chanAndSan(last) + ")")
 		}
 
 		if err != nil {
@@ -127,7 +133,7 @@ func canInsert(text, emoji string, index int) bool {
 		return true
 	}
 
-	if emoji == EmojiPrefix+"ayumu"+EmojiSuffix && string(text[index-3:index]) == "雪" {
+	if emoji == emojinize("ayumu") && string(text[index-len("雪"):index]) == "雪" {
 		return false
 	}
 
@@ -177,7 +183,7 @@ func insertAll(text, emojiName string, re *regexp.Regexp) string {
 		return text
 	}
 
-	emoji := EmojiPrefix + emojiName + EmojiSuffix // :mltd_name:
+	emoji := emojinize(emojiName) // :mltd_name:
 	addedLen := 0
 	for _, index := range indexes {
 		index[0] += addedLen
@@ -199,8 +205,8 @@ func insertEmoji(text string) string {
 	}
 
 	text = insertSR(text)
-	r := strings.NewReplacer(Types...) // types replacer
-	text = r.Replace(text)             // insert types emoji
+	r := strings.NewReplacer(EasyIcons...) // types replacer
+	text = r.Replace(text)                 // insert types emoji
 
 	return text
 }
