@@ -31,6 +31,8 @@ func MastodonInit() {
 	if err != nil {
 		panic(err)
 	}
+
+	alertToOwner("가동을 시작합니다")
 }
 
 func tootAll(posts []Post) {

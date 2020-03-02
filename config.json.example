@@ -1,10 +1,10 @@
 {
   "mastodon": {
-    "instance": "fedimas.com",
+    "instance": "planet.moe",
     "client_key": "clientKey",
     "client_secret": "clientSecret",
     "access_token": "accessToken",
-    "owner": "@gorae@fedimas.com",
+    "owner": "@bombwhale@planet.moe",
     "insert_emoji": true,
     "visibility": "unlisted"
   },

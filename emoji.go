@@ -115,7 +115,7 @@ func generateRegexp(idols *[]Idol) {
 		last := (*idols)[i].LastName
 		first := (*idols)[i].FirstName
 
-		nameRule := chanAndSan(first) + "|" + last + first + "「"
+		nameRule := chanAndSan(first) + "|" + last + first + "|" + first + "「"
 		if (*idols)[i].LastName == "" {
 			(*idols)[i].Regex, err = regexp.Compile("(" + nameRule + ")")
 		} else {
@@ -187,13 +187,13 @@ func insertAll(text, emojiName string, re *regexp.Regexp) string {
 	addedLen := 0
 	for _, index := range indexes {
 		index[0] += addedLen
-		textInserted := insert(text, emoji, index[0])
-		if len(textInserted) == len(text) {
+		inserted := insert(text, emoji, index[0])
+		if len(inserted) == len(text) {
 			continue
 		}
 
-		addedLen += len(textInserted) - len(text)
-		text = textInserted
+		addedLen += len(inserted) - len(text)
+		text = inserted
 	}
 
 	return text
