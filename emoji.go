@@ -20,12 +20,15 @@ const (
 )
 
 var (
-	Types = []string{
+	EasyIcons = []string{
 		"765PRO", ZeroWidth + ":765pro:" + ZeroWidth + "765PRO",
-		"FAIRY", EmojiPrefix + "fairy" + EmojiSuffix + "FAIRY",
-		"ANGEL", EmojiPrefix + "angel" + EmojiSuffix + "ANGEL",
-		"PRINCESS", EmojiPrefix + "princess" + EmojiSuffix + "PRINCESS",
-		"SSR", EmojiPrefix + "gasha_rainbow" + EmojiSuffix + "SSR",
+		"FAIRY", emojinize("fairy") + "FAIRY",
+		"ANGEL", emojinize("angel") + "ANGEL",
+		"PRINCESS", emojinize("princess") + "PRINCESS",
+		"SSR", emojinize("gasha_rainbow") + "SSR",
+		"プラチナスター", emojinize("pst") + "プラチナスター",
+		"ミリオンフェス", emojinize("fes") + "ミリオンフェス",
+		"ミリオンジュエル", emojinize("jewel") + "ミリオンジュエル",
 	}
 )
 
@@ -102,18 +105,21 @@ func chanAndSan(name string) string {
 	return name + "ちゃん|" + name + "さん"
 }
 
+func emojinize(name string) string {
+	return EmojiPrefix + name + EmojiSuffix
+}
+
 func generateRegexp(idols *[]Idol) {
 	for i := range *idols {
 		var err error
 		last := (*idols)[i].LastName
 		first := (*idols)[i].FirstName
 
-		nameRule := chanAndSan(first) + "|" + first + "「"
-		fullNameRule := "(" + last + first + "|" + nameRule + "|" + chanAndSan(last) + ")"
+		nameRule := chanAndSan(first) + "|" + last + first + "|" + first + "「"
 		if (*idols)[i].LastName == "" {
-			(*idols)[i].Regex, err = regexp.Compile("(" + first + "|" + nameRule + ")")
+			(*idols)[i].Regex, err = regexp.Compile("(" + nameRule + ")")
 		} else {
-			(*idols)[i].Regex, err = regexp.Compile(fullNameRule)
+			(*idols)[i].Regex, err = regexp.Compile("(" + nameRule + "|" + chanAndSan(last) + ")")
 		}
 
 		if err != nil {
@@ -122,36 +128,28 @@ func generateRegexp(idols *[]Idol) {
 	}
 }
 
-func insertGasha(text string) string {
-	sr, err := regexp.Compile(`SR`)
-	if err != nil {
-		alertToOwner("REGEXP COMPILE ERROR")
-		return text
+func canInsert(text, emoji string, index int) bool {
+	if index == 0 {
+		return true
 	}
 
-	indexes := sr.FindAllStringIndex(text, -1)
-	if indexes == nil {
-		return text
-	}
-	srEmoji := EmojiPrefix + "gasha_yellow" + EmojiSuffix
-
-	inserted := 0
-	for _, index := range indexes {
-		index[0] = index[0] + len(srEmoji)*inserted
-		if index[0] > 0 {
-			if string(text[index[0]-1]) == "S" {
-				continue
-			}
-		}
-		text = insertEmoji(text, srEmoji, index[0])
-		inserted++
+	if emoji == emojinize("ayumu") && string(text[index-len("雪"):index]) == "雪" {
+		return false
 	}
 
-	return text
+	if string(text[index-1]) == "S" {
+		return false
+	}
+
+	return true
 }
 
-func insertEmoji(text, emoji string, index int) string {
+func insert(text, emoji string, index int) string {
 	if len(text) < index {
+		return text
+	}
+
+	if !canInsert(text, emoji, index) {
 		return text
 	}
 
@@ -169,21 +167,46 @@ func insertEmoji(text, emoji string, index int) string {
 	return text
 }
 
-func insertAll(text string) string {
-	for i := range idolTable {
-		emoji := EmojiPrefix + idolTable[i].EmojiName + EmojiSuffix // :mltd_name:
-		index := idolTable[i].Regex.FindStringIndex(text)           // find
-		if index == nil {
+func insertSR(text string) string {
+	sr, err := regexp.Compile(`SR`)
+	if err != nil {
+		alertToOwner("REGEXP COMPILE ERROR")
+		return text
+	}
+
+	return insertAll(text, "gasha_yellow", sr)
+}
+
+func insertAll(text, emojiName string, re *regexp.Regexp) string {
+	indexes := re.FindAllStringIndex(text, -1) // find
+	if indexes == nil {
+		return text
+	}
+
+	emoji := emojinize(emojiName) // :mltd_name:
+	addedLen := 0
+	for _, index := range indexes {
+		index[0] += addedLen
+		inserted := insert(text, emoji, index[0])
+		if len(inserted) == len(text) {
 			continue
 		}
 
-		text = insertEmoji(text, emoji, index[0])
-
+		addedLen += len(inserted) - len(text)
+		text = inserted
 	}
 
-	r := strings.NewReplacer(Types...) // types replacer
-	text = r.Replace(text)             // insert types emoji
-	text = insertGasha(text)
+	return text
+}
+
+func insertEmoji(text string) string {
+	for i := range idolTable {
+		text = insertAll(text, idolTable[i].EmojiName, idolTable[i].Regex)
+	}
+
+	text = insertSR(text)
+	r := strings.NewReplacer(EasyIcons...) // types replacer
+	text = r.Replace(text)                 // insert types emoji
 
 	return text
 }

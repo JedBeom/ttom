@@ -31,6 +31,8 @@ func MastodonInit() {
 	if err != nil {
 		panic(err)
 	}
+
+	alertToOwner("가동을 시작합니다")
 }
 
 func tootAll(posts []Post) {
@@ -44,7 +46,7 @@ func tootAll(posts []Post) {
 
 		post.Text = html.UnescapeString(post.Text)
 		if config.Mastodon.InsertEmoji {
-			post.Text = insertAll(post.Text)
+			post.Text = insertEmoji(post.Text)
 		}
 
 		_, err := toot(post.Text, "", images)
@@ -68,7 +70,7 @@ func downloadMedia(link string) io.Reader {
 func toot(content, visibility string, readers []io.Reader) (st *madon.Status, err error) {
 
 	if visibility == "" {
-		visibility = "public"
+		visibility = config.Mastodon.Visibility
 	}
 
 	var mediaIDs = make([]int64, 0, 4)
