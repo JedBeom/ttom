@@ -40,7 +40,7 @@ func tootAll(posts []Post) {
 
 		var images = make([]io.Reader, 0, 4)
 
-		for _, img := range post.Images {
+		for _, img := range post.Media {
 			images = append(images, downloadMedia(img))
 		}
 
@@ -77,7 +77,7 @@ func toot(content, visibility string, readers []io.Reader) (st *madon.Status, er
 
 	// upload medias
 	for _, reader := range readers {
-		attach, err := mc.UploadMediaReader(reader, "mltd_media", "", "")
+		attach, err := mc.UploadMediaReader(reader, "mltd_media", "© BANDAI NAMCO", "")
 		if err != nil {
 			alertToOwner("toot(): " + err.Error())
 			continue

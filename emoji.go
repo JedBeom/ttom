@@ -33,7 +33,7 @@ var (
 )
 
 var idolTable = []Idol{
-	//　All Stars
+	//　Allstars
 	{LastName: "天海", FirstName: "春香", EmojiName: "haruka"},
 	{LastName: "如月", FirstName: "千早", EmojiName: "chihaya"},
 	{LastName: "星井", FirstName: "美希", EmojiName: "miki"},
@@ -137,7 +137,7 @@ func canInsert(text, emoji string, index int) bool {
 		return false
 	}
 
-	if string(text[index-1]) == "S" {
+	if emoji == emojinize("gasha_yellow") && string(text[index-1]) == "S" {
 		return false
 	}
 
@@ -146,10 +146,6 @@ func canInsert(text, emoji string, index int) bool {
 
 func insert(text, emoji string, index int) string {
 	if len(text) < index {
-		return text
-	}
-
-	if !canInsert(text, emoji, index) {
 		return text
 	}
 
@@ -187,12 +183,12 @@ func insertAll(text, emojiName string, re *regexp.Regexp) string {
 	addedLen := 0
 	for _, index := range indexes {
 		index[0] += addedLen
-		inserted := insert(text, emoji, index[0])
-		if len(inserted) == len(text) {
+		if !canInsert(text, emoji, index[0]) {
 			continue
 		}
+		inserted := insert(text, emoji, index[0])
 
-		addedLen += len(inserted) - len(text)
+		addedLen += len(emoji)
 		text = inserted
 	}
 

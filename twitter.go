@@ -92,21 +92,23 @@ func tweetFilter(tw twitter.Tweet) (post Post) {
 
 	post.CreatedAt, _ = tw.CreatedAtTime()
 
-	// Video/Image 있다면
-	if tw.ExtendedEntities != nil {
-		for _, media := range tw.ExtendedEntities.Media {
-			if len(post.Images) >= 4 {
-				break
-			}
+	if tw.ExtendedEntities == nil {
+		return
+	}
 
-			if media.Type == "photo" { // is photo
-				post.Images = append(post.Images, media.MediaURLHttps) // add
-			} else if media.Type == "video" { // is video
-				for _, v := range media.VideoInfo.Variants {
-					if v.ContentType == "video/mp4" && v.Bitrate >= 1900000 { // is mp4 and 720p or up
-						post.Images = append(post.Images, v.URL)
-						break
-					}
+	// Video/Image 있다면
+	for _, media := range tw.ExtendedEntities.Media {
+		if len(post.Media) >= 4 { // 마스토돈은 이미지가 4장을 못 넘는다
+			break
+		}
+
+		if media.Type == "photo" { // is photo
+			post.Media = append(post.Media, media.MediaURLHttps) // add
+		} else if media.Type == "video" { // is video
+			for _, v := range media.VideoInfo.Variants {
+				if v.ContentType == "video/mp4" && v.Bitrate >= 1900000 { // is mp4 and 720p or up
+					post.Media = append(post.Media, v.URL)
+					break
 				}
 			}
 		}
