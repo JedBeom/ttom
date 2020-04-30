@@ -70,7 +70,7 @@ var idolTable = []Idol{
 	{LastName: "天空橋", FirstName: "朋花", EmojiName: "tomoka"},
 	{LastName: "北沢", FirstName: "志保", EmojiName: "shiho"},
 	{LastName: "舞浜", FirstName: "歩", EmojiName: "ayumu"},
-	{LastName: "二回", FirstName: "度千鶴", EmojiName: "chizuru"},
+	{LastName: "二階堂", FirstName: "千鶴", EmojiName: "chizuru"},
 	{LastName: "真壁", FirstName: "瑞希", EmojiName: "mizuki"},
 	{LastName: "百瀬", FirstName: "莉緒", EmojiName: "rio"},
 	{LastName: "永吉", FirstName: "昴", EmojiName: "subaru"},
