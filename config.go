@@ -18,11 +18,15 @@ type Config struct {
 	} `json:"mastodon"`
 
 	Twitter struct {
-		ClientID      string `json:"client_id"`
-		ClientSecret  string `json:"client_secret"`
-		Account       string `json:"account"`
-		RefreshSecond int    `json:"refresh_sec"`
+		Account            string `json:"account"`
+		TweetFetchLimit    int    `json:"tweet_fetch_limit"`
+		TweetRefreshSecond int    `json:"tweet_refresh_sec"`
+		ProfileRefreshHour int    `json:"profile_refresh_hour"`
 	} `json:"twitter"`
+
+	SQL struct {
+		Filename string `json:"filename"`
+	} `json:"sql"`
 }
 
 var config Config

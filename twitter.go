@@ -1,52 +1,39 @@
 package main
 
 import (
-	"context"
 	"io"
 	"strings"
+	"time"
 
-	"github.com/dghubble/go-twitter/twitter"
-	"golang.org/x/oauth2/clientcredentials"
+	twitterscraper "github.com/n0madic/twitter-scraper"
 )
 
 var (
-	tc         *twitter.Client
-	latestPost Post
+	tc              *twitterscraper.Scraper
+	latestTweetDate time.Time
 )
 
 func TwitterInit() {
-	var twitterConfig = &clientcredentials.Config{
-		ClientID:     config.Twitter.ClientID,
-		ClientSecret: config.Twitter.ClientSecret,
-		TokenURL:     "https://api.twitter.com/oauth2/token",
-	}
-	httpClient := twitterConfig.Client(context.TODO())
-	tc = twitter.NewClient(httpClient)
+	tc = twitterscraper.New()
 }
 
 // User를 불러옵니다
-func getTwitterUser(acc string) (user *twitter.User, err error) {
-	user, _, err = tc.Users.Show(&twitter.UserShowParams{
-		ScreenName: acc,
-	})
+func getTwitterUser(acc string) (user twitterscraper.Profile, err error) {
+	user, err = tc.GetProfile(acc)
 	return
 }
 
 // 트윗을 불러옵니다
-func getTweets(targetID int64, limit int) ([]twitter.Tweet, error) {
-	tweets, _, err := tc.Timelines.UserTimeline(&twitter.UserTimelineParams{
-		UserID:    targetID,
-		Count:     limit,
-		TweetMode: "extended",
-	})
+func getTweets(userID string, limit int) ([]*twitterscraper.Tweet, error) {
+	tweets, _, err := tc.FetchTweetsByUserID(userID, limit, "")
 
 	return tweets, err
 }
 
 // 새 트윗이 있는지 체크
-func checkNew(targetID int64) {
+func checkNew(userID string) {
 	// 5개 트윗 불러오기
-	tweets, err := getTweets(targetID, 5)
+	tweets, err := getTweets(userID, 5)
 	if err != nil {
 		return
 	}
@@ -56,84 +43,67 @@ func checkNew(targetID int64) {
 		return
 	}
 
-	// cached tweet이 없다면
-	if latestPost.ID == 0 {
-		latestPost = tweetFilter(tweets[0])
-		return
-	}
-
 	var newPosts []Post
 	for _, tw := range tweets {
-		createdAt, err := tw.CreatedAtTime()
-		if err != nil {
-			continue
-		}
-
 		// 만약 캐시된 트윗보다 더 오래전의 트윗이라면 브레이크
-		if createdAt.Sub(latestPost.CreatedAt).Seconds() <= 0 {
+		if tw.TimeParsed.Sub(latestTweetDate).Seconds() <= 0 {
 			break
 		}
 
-		newPosts = append(newPosts, tweetFilter(tw))
+		newPosts = append(newPosts, tweetFilter(*tw))
 	}
 
 	if len(newPosts) != 0 {
-		latestPost = newPosts[0]
-		go tootAll(newPosts)
+		latestTweetDate = tweets[0].TimeParsed
+		go tootPosts(newPosts)
 	}
 
 }
 
 // Tweet -> Post
-func tweetFilter(tw twitter.Tweet) (post Post) {
-	// ID, Text Get
-	post.ID = tw.ID
-	post.Text = tw.FullText
+func tweetFilter(tw twitterscraper.Tweet) (post Post) {
+	post.TweetID = tw.ID
+	post.Content = tw.Text
 
-	post.CreatedAt, _ = tw.CreatedAtTime()
-
-	if tw.ExtendedEntities == nil {
-		return
+	if tw.IsRetweet {
+		post.IsBoosted = true
+		post.SubjectTweetID = tw.RetweetedStatusID
+	} else if tw.IsQuoted {
+		post.IsQuoted = true
+		post.SubjectTweetID = tw.QuotedStatusID
+	} else if tw.IsReply {
+		post.IsReplied = true
+		post.SubjectTweetID = tw.InReplyToStatusID
 	}
 
-	// Video/Image 있다면
-	for _, media := range tw.ExtendedEntities.Media {
-		if len(post.Media) >= 4 { // 마스토돈은 이미지가 4장을 못 넘는다
-			break
-		}
-
-		if media.Type == "photo" { // is photo
-			post.Media = append(post.Media, media.MediaURLHttps) // add
-		} else if media.Type == "video" { // is video
-			for _, v := range media.VideoInfo.Variants {
-				if v.ContentType == "video/mp4" && v.Bitrate >= 1900000 { // is mp4 and 720p or up
-					post.Media = append(post.Media, v.URL)
-					break
-				}
-			}
-		}
+	post.Media = make([]string, 0, 4)
+	for _, photo := range tw.Photos {
+		post.Media = append(post.Media, photo.URL)
+	}
+	for _, video := range tw.Videos {
+		post.Media = append(post.Media, video.URL)
 	}
 
+	post.CreatedAt = tw.TimeParsed
 	return
 }
 
 // 새로운 아바타나 헤더가 있는지 확인
-func detectNewAvatarOrHeader(old *twitter.User) (new *twitter.User) {
+func detectNewAvatarOrHeader(old twitterscraper.Profile) (new twitterscraper.Profile) {
 	var err error
 	new, err = getTwitterUser(config.Twitter.Account)
 	if err != nil {
 		alertToOwner("detectNewAvatarOrHeader:getTwitterUser(): " + err.Error())
-		new = old
 		return
 	}
 
 	var avatar, header io.Reader
-	if new.ProfileImageURLHttps != old.ProfileImageURLHttps {
-		avatar = downloadMedia(strings.Replace(new.ProfileImageURLHttps, "_normal", "", 1))
+	if new.Avatar != old.Avatar {
+		avatar = downloadMedia(strings.Replace(new.Avatar, "_normal", "", 1))
 	}
 
-	if new.ProfileBannerURL != old.ProfileBannerURL {
-		header = downloadMedia(new.ProfileBannerURL)
+	if new.Banner != old.Banner {
+		header = downloadMedia(new.Banner)
 	}
 
 	// 만약 있다면 교체

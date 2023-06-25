@@ -9,9 +9,13 @@
     "visibility": "unlisted"
   },
   "twitter": {
-    "client_id": "clientID",
-    "client_secret": "clientSecret",
-    "account": "account",
-    "refresh_sec": 10
+    "account": "imasml_theater",
+	"tweet_fetch_limit": 10,
+    "tweet_refresh_sec": 10,
+    "profile_refresh_hour": 24
+  },
+  "sql": {
+	  "filename": "posts.sql"
   }
+
 }

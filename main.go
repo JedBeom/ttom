@@ -3,13 +3,14 @@ package main
 import (
 	"time"
 
-	"github.com/dghubble/go-twitter/twitter"
+	twitterscraper "github.com/n0madic/twitter-scraper"
 )
 
 func main() {
 	loadConfig()
 	TwitterInit()
 	MastodonInit()
+	initSQL()
 
 	user, err := getTwitterUser(config.Twitter.Account)
 	if err != nil {
@@ -21,17 +22,17 @@ func main() {
 	go autoChange(user)
 
 	for {
-		checkNew(user.ID)
-		time.Sleep(time.Second * time.Duration(config.Twitter.RefreshSecond))
+		checkNew(user.UserID)
+		time.Sleep(time.Second * time.Duration(config.Twitter.TweetRefreshSecond))
 	}
 }
 
-func autoChange(start *twitter.User) {
-	var user = new(twitter.User)
-	*user = *start
+func autoChange(start twitterscraper.Profile) {
+	// user := start
+	var user twitterscraper.Profile
 
 	for {
 		user = detectNewAvatarOrHeader(user)
-		time.Sleep(time.Hour * 24)
+		time.Sleep(time.Hour * time.Duration(config.Twitter.ProfileRefreshHour))
 	}
 }
