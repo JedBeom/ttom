@@ -90,7 +90,7 @@ var idolTable = []Idol{
 	{LastName: "豊川", FirstName: "風花", EmojiName: "fuka"},
 	{LastName: "宮尾", FirstName: "美也", EmojiName: "miya"},
 	{LastName: "篠宮", FirstName: "可憐", EmojiName: "karen"},
-	{LastName: "北巻", FirstName: "麗花", EmojiName: "reika"},
+	{LastName: "北上", FirstName: "麗花", EmojiName: "reika"},
 	{LastName: "桜守", FirstName: "歌織", EmojiName: "kaori"},
 
 	// Guests
